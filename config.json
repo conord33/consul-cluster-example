@@ -1,0 +1,7 @@
+{
+    "data_dir": "/var/consul",
+    "datacenter": "local",
+    "encrypt": "Dt3P9SpKGAR/DIUN1cDirg==",
+    "log_level": "INFO",
+    "enable_syslog": true
+}
