@@ -3,13 +3,10 @@ set -e
 
 # Read from the file we created
 SERVER_COUNT=$(cat /tmp/consul-server-count | tr -d '\n')
-# Get the public IP
-BIND_ADDRS=$(/sbin/ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }')
 
 # Write the flags to a temporary file
 cat >/tmp/consul_flags << EOF
 export CONSUL_FLAGS="-server -bootstrap-expect=$SERVER_COUNT"
-export BIND=$BIND_ADDRS
 EOF
 
 # Write it to the full service file
@@ -19,7 +16,7 @@ sudo chmod 0644 /etc/service/consul
 
 # Setup the bind address for web ui
 cat >/tmp/consul-bind << EOF
-{"addresses": {"http": "${BIND_ADDRS}"}}
+{"addresses": {"http": "0.0.0.0"}}
 EOF
 
 sudo mv /tmp/consul-bind /etc/consul.d/bind.json

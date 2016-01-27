@@ -4,6 +4,41 @@ provider "google" {
   credentials = "${file(var.account_file_path)}"
 }
 
+resource "google_compute_http_health_check" "default" {
+  name = "consul-server-basic-check"
+  request_path = "/v1/status/leader"
+  check_interval_sec = 2
+  healthy_threshold = 1
+  unhealthy_threshold = 10
+  timeout_sec = 2
+  port = "8500"
+}
+
+resource "google_compute_target_pool" "default" {
+  name = "consul-server-target-pool"
+  instances = ["${google_compute_instance.consul-server.*.self_link}"]
+  health_checks = ["${google_compute_http_health_check.default.name}"]
+}
+
+resource "google_compute_forwarding_rule" "default" {
+  name = "consul-server-forwarding-rule"
+  target = "${google_compute_target_pool.default.self_link}"
+  port_range = "8500"
+}
+
+resource "google_compute_firewall" "default" {
+  name = "consul-server-firewall"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports = ["8500"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags = ["consul-server"]
+}
+
 resource "google_compute_instance" "consul-server" {
   count = "${var.server_count}"
 
@@ -59,7 +94,7 @@ resource "google_compute_instance" "consul-server" {
     scopes = ["https://www.googleapis.com/auth/compute.readonly"]
   }
 }
-/*
+
 resource "google_compute_instance" "consul-client" {
   count = 1
 
@@ -89,15 +124,14 @@ resource "google_compute_instance" "consul-client" {
 
   provisioner "remote-exec" {
     inline = [
-      "echo ${var.server_count} > /tmp/consul-server-count",
-      "echo ${google_compute_instance.consul-server.0.network_interface.0.address} > /tmp/consul-server-addr"
+      "echo ${google_compute_forwarding_rule.default.ip_address} > /tmp/consul-join-addr"
     ]
   }
 
   provisioner "remote-exec" {
     scripts = [
+      "../scripts/client-join.sh",
       "../scripts/install.sh",
-      "../scripts/server.sh",
       "../scripts/service.sh"
     ]
   }
@@ -115,4 +149,3 @@ resource "google_compute_instance" "consul-client" {
     scopes = ["https://www.googleapis.com/auth/compute.readonly"]
   }
 }
-*/
