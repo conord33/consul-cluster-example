@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# Read the address to join from the file we provisioned
-JOIN_ADDRS=$(cat /tmp/consul-server-addr | tr -d '\n')
-
 echo "Installing dependencies..."
 sudo yum update -y
 sudo yum install -y unzip wget
@@ -21,9 +18,11 @@ sudo mkdir -p /mnt/consul
 sudo mkdir -p /etc/service
 
 # Setup the join address
+JOIN_ADDRS=$(cat /tmp/consul-join-addr | tr -d '\n')
 cat >/tmp/consul-join << EOF
 export CONSUL_JOIN="${JOIN_ADDRS}"
 EOF
+
 sudo mv /tmp/consul-join /etc/service/consul-join
 sudo chmod 0644 /etc/service/consul-join
 

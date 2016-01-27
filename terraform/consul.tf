@@ -34,7 +34,7 @@ resource "google_compute_instance" "consul-server" {
   provisioner "remote-exec" {
     inline = [
       "echo ${var.server_count} > /tmp/consul-server-count",
-      "echo ${google_compute_instance.consul-server.0.network_interface.0.address} > /tmp/consul-server-addr"
+      "echo ${google_compute_instance.consul-server.0.network_interface.0.address} > /tmp/consul-join-addr"
     ]
   }
 
@@ -59,18 +59,47 @@ resource "google_compute_instance" "consul-server" {
     scopes = ["https://www.googleapis.com/auth/compute.readonly"]
   }
 }
-
 /*
 resource "google_compute_instance" "consul-client" {
   count = 1
 
-  name = "consul-client-${count.index}"
+  name = "consul-client"
   machine_type = "f1-micro"
   zone = "${var.region_zone}"
-  tags = ["consul", "consul-client", "http-server"]
+  tags = ["consul", "consul-client"]
+
+  connection {
+    user = "${var.user}"
+    private_key = "${var.private_key_path}"
+  }
 
   disk {
     image = "centos-cloud/centos-6-v20160119"
+  }
+
+  provisioner "file" {
+    source = "../scripts/upstart.conf"
+    destination = "/tmp/upstart.conf"
+  }
+
+  provisioner "file" {
+    source = "../scripts/upstart-join.conf"
+    destination = "/tmp/upstart-join.conf"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo ${var.server_count} > /tmp/consul-server-count",
+      "echo ${google_compute_instance.consul-server.0.network_interface.0.address} > /tmp/consul-server-addr"
+    ]
+  }
+
+  provisioner "remote-exec" {
+    scripts = [
+      "../scripts/install.sh",
+      "../scripts/server.sh",
+      "../scripts/service.sh"
+    ]
   }
 
   network_interface {
@@ -79,7 +108,7 @@ resource "google_compute_instance" "consul-client" {
   }
 
   metadata {
-    sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+    sshKeys = "${var.user}:${file(var.public_key_path)}"
   }
 
   service_account {
