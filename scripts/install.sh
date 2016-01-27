@@ -23,8 +23,8 @@ cat >/tmp/consul-join << EOF
 export CONSUL_JOIN="${JOIN_ADDRS}"
 EOF
 
-sudo mv /tmp/consul-join /etc/service/consul-join
-sudo chmod 0644 /etc/service/consul-join
+sudo mv /tmp/consul-join /etc/default/consul-join
+sudo chmod 0644 /etc/default/consul-join
 
 echo "Installing Upstart service..."
 sudo mv /tmp/upstart.conf /etc/init/consul.conf

@@ -10,9 +10,9 @@ export CONSUL_FLAGS="-server -bootstrap-expect=$SERVER_COUNT"
 EOF
 
 # Write it to the full service file
-sudo mv /tmp/consul_flags /etc/service/consul
-sudo chown root:root /etc/service/consul
-sudo chmod 0644 /etc/service/consul
+sudo mv /tmp/consul_flags /etc/default/consul
+sudo chown root:root /etc/default/consul
+sudo chmod 0644 /etc/default/consul
 
 # Setup the bind address for web ui
 cat >/tmp/consul-bind << EOF

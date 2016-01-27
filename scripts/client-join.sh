@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Getting cluster join address for client"
+echo "Getting cluster join address for client..."
 ADDR_FILE=/tmp/consul-join-addr
 ADDR_FILE_TMP=/tmp/consul-join-addr-tmp
 CLUSTER_ADDR=$(cat $ADDR_FILE | tr -d '\n')
