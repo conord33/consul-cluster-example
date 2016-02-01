@@ -1,2 +1,5 @@
 .vagrant/
 .bundle/
+*.tfvars
+*.tfstate
+*.tfstate.backup
