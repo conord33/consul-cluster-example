@@ -1,0 +1,12 @@
+---
+- name: install epel
+  yum: name=epel-release state=installed
+
+- name: install consul client dependencies
+  yum: name=python-pip state=installed
+
+- name: install python consul requirements
+  pip: name={{ item }}
+  with_items:
+    - requests
+    - python-consul

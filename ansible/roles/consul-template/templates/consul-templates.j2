@@ -1,0 +1,10 @@
+#{{ ansible_managed }}
+{% for t in consul_template_templates %}
+# {{ t.name }}
+template {
+  source = "{{ t.src }}"
+  destination = "{{ t.dest }}"
+  command = "{{ t.command }}"
+}
+
+{% endfor %}

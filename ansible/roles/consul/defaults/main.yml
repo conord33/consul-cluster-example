@@ -1,6 +1,7 @@
 ---
-# defaults file for consul
+# Whether or not the consul agent should be in client (default) or server mode
 consul_server: false
+# Number of servers to expect on bootstrapping
 consul_server_count: ""
-consul_cluster_addr: ""
+# The ip address to join
 consul_join_ip: ""

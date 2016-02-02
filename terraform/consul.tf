@@ -96,7 +96,7 @@ resource "null_resource" "Provision" {
     command = <<EOF
     cd ../ansible
     ansible-playbook -i inventories/terraform.py \
-      -e 'consul_cluster_addr=${google_compute_forwarding_rule.default.ip_address} consul_server_count=${var.server_count}' \
+      -e 'consul_join_ip=${google_compute_forwarding_rule.default.ip_address} consul_server_count=${var.server_count}' \
       -u ${var.user} \
       consul.yml
 EOF

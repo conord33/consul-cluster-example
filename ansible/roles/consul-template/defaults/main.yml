@@ -1,0 +1,3 @@
+---
+# Consul templates to create
+consul_template_templates: {}

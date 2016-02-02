@@ -1,0 +1,27 @@
+---
+- name: download consul-template
+  unarchive:
+    src: https://releases.hashicorp.com/consul-template/0.12.2/consul-template_0.12.2_linux_amd64.zip
+    dest: /tmp
+    copy: false
+
+- name: make consul-template executable
+  file: path=/tmp/consul-template mode=a+x
+
+- name: move consul-template to bin
+  command: creates="/usr/local/bin/consul-template" mv /tmp/consul-template /usr/local/bin/consul-template
+
+- name: create consul-template direcotries
+  file: path={{ item }} state=directory
+  with_items:
+    - /etc/consul-template/conf.d
+    - /etc/consul-template/templates
+
+- name: configure consul-template
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - src: consul-templates.j2
+      dest: /etc/consul-template/conf.d/templates.conf
+    - src: consul-template.conf.j2
+      dest: /etc/init/consul-template.conf
+  notify: "restart consul-template"

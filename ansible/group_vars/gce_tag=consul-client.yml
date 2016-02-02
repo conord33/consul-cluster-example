@@ -1,0 +1,6 @@
+---
+consul_template_templates:
+  - name: nginx-site
+    src: /etc/consul-template/templates/nginx.ctmpl
+    dest: /usr/share/nginx/html/index.html
+    command: "service nginx restart"

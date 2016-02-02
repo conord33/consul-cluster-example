@@ -1,16 +1,12 @@
 description "Join the consul cluster"
-
+# {{ ansible_managed }}
 start on started consul
 stop on stopped consul
 
 task
 
 script
-  {% if consul_cluster_addr %}
-  CONSUL_JOIN={{ consul_cluster_addr }}
-  {% elif consul_join_ip %}
   CONSUL_JOIN={{ consul_join_ip }}
-  {% endif %}
   BIND=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'`
   # Keep trying to join until it succeeds
   set +e

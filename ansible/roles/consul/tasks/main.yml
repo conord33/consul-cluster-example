@@ -1,52 +1,8 @@
 ---
-# tasks file for consul
-- block:
-  
-    - name: install epel
-      yum: name=epel-release state=installed
+- include: consul.yml
 
-    - name: install consul client dependencies
-      yum: name=python-pip state=installed
-
-    - name: install python consul requirements
-      pip: name={{ item }}
-      with_items:
-        - requests
-        - python-consul
-
+- include: client.yml
   when: not consul_server
-
-- name: install consul dependencies
-  yum: state=present name=libselinux-python
-
-- name: download consul
-  unarchive:
-    src: https://releases.hashicorp.com/consul/0.6.3/consul_0.6.3_linux_amd64.zip
-    dest: /tmp
-    copy: false
-
-- name: make consul executable
-  file: path=/tmp/consul mode=a+x
-
-- name: move consul to bin
-  command: creates="/usr/local/bin/consul" mv /tmp/consul /usr/local/bin/consul
-
-- name: create consul direcotries
-  file: path="{{ item }}" state=directory
-  with_items:
-    - /etc/consul.d
-    - /mnt/consul
-    - /etc/service
-    - /etc/init
-
-- name: create consul start up scripts
-  template: src={{ item.src }} dest={{ item.dest }}
-  with_items:
-    - src: consul.conf.j2
-      dest: /etc/init/consul.conf
-    - src: consul-join.conf.j2
-      dest: /etc/init/consul-join.conf
-  notify: "restart consul"
 
 - name: add consul ui config
   copy: src=http_bind.json dest=/etc/consul.d/bind.json mode=0644

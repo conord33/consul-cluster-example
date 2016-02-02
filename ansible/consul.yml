@@ -8,7 +8,6 @@
 - name: Configure client
   hosts: "gce_tag=consul-client"
   become: true
-  vars:
-    web_title: "Ansible Demo"
   roles:
     - web
+    - consul-template
