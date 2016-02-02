@@ -47,38 +47,8 @@ resource "google_compute_instance" "consul-server" {
   zone = "${var.region_zone}"
   tags = ["consul", "consul-server"]
 
-  connection {
-    user = "${var.user}"
-    private_key = "${var.private_key_path}"
-  }
-
   disk {
     image = "centos-cloud/centos-6-v20160119"
-  }
-
-  provisioner "file" {
-    source = "../scripts/upstart.conf"
-    destination = "/tmp/upstart.conf"
-  }
-
-  provisioner "file" {
-    source = "../scripts/upstart-join.conf"
-    destination = "/tmp/upstart-join.conf"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "echo ${var.server_count} > /tmp/consul-server-count",
-      "echo ${google_compute_instance.consul-server.0.network_interface.0.address} > /tmp/consul-join-addr"
-    ]
-  }
-
-  provisioner "remote-exec" {
-    scripts = [
-      "../scripts/install.sh",
-      "../scripts/server.sh",
-      "../scripts/service.sh"
-    ]
   }
 
   network_interface {
@@ -96,44 +66,15 @@ resource "google_compute_instance" "consul-server" {
 }
 
 resource "google_compute_instance" "consul-client" {
-  count = 1
+  count = 2
 
-  name = "consul-client"
+  name = "consul-client-${count.index}"
   machine_type = "f1-micro"
   zone = "${var.region_zone}"
-  tags = ["consul", "consul-client"]
-
-  connection {
-    user = "${var.user}"
-    private_key = "${var.private_key_path}"
-  }
+  tags = ["consul", "consul-client", "http-server"]
 
   disk {
     image = "centos-cloud/centos-6-v20160119"
-  }
-
-  provisioner "file" {
-    source = "../scripts/upstart.conf"
-    destination = "/tmp/upstart.conf"
-  }
-
-  provisioner "file" {
-    source = "../scripts/upstart-join.conf"
-    destination = "/tmp/upstart-join.conf"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "echo ${google_compute_forwarding_rule.default.ip_address} > /tmp/consul-join-addr"
-    ]
-  }
-
-  provisioner "remote-exec" {
-    scripts = [
-      "../scripts/client-join.sh",
-      "../scripts/install.sh",
-      "../scripts/service.sh"
-    ]
   }
 
   network_interface {
@@ -147,5 +88,17 @@ resource "google_compute_instance" "consul-client" {
 
   service_account {
     scopes = ["https://www.googleapis.com/auth/compute.readonly"]
+  }
+}
+
+resource "null_resource" "Provision" {
+  provisioner "local-exec" {
+    command = <<EOF
+    cd ../ansible
+    ansible-playbook -i inventories/terraform.py \
+      -e 'consul_cluster_addr=${google_compute_forwarding_rule.default.ip_address} consul_server_count=${var.server_count}' \
+      -u ${var.user} \
+      consul.yml
+EOF
   }
 }

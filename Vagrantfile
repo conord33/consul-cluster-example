@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Base box for consul servers
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "bento/centos-6.7"
 
   # Ip of the server that will get bootstrapped
   leader_ip = "172.20.20.11"

@@ -8,9 +8,6 @@ respawn
 normal exit 0 INT
 
 script
-  if [ -f "/etc/default/consul" ]; then
-    . /etc/default/consul
-  fi
 
   # Make sure to use all our CPUs, because Consul can block a scheduler thread
   export GOMAXPROCS=`nproc`
@@ -20,8 +17,10 @@ script
 
   exec /usr/local/bin/consul agent \
     -config-dir="/etc/consul.d" \
-    -bind=$BIND -ui \
+    -bind=$BIND \
     -data-dir=/mnt/consul \
-    $CONSUL_FLAGS \
+    {% if consul_server %}
+    -ui -server -bootstrap-expect={{ consul_server_count }} \
+    {% endif %}
     >>/var/log/consul.log 2>&1
 end script

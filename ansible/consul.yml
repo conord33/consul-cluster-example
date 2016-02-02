@@ -1,0 +1,14 @@
+---
+- name: Configure Consul
+  hosts: all
+  become: true
+  roles:
+    - consul
+
+- name: Configure client
+  hosts: "gce_tag=consul-client"
+  become: true
+  vars:
+    web_title: "Ansible Demo"
+  roles:
+    - web

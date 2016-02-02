@@ -1,0 +1,6 @@
+---
+# defaults file for consul
+consul_server: false
+consul_server_count: ""
+consul_cluster_addr: ""
+consul_join_ip: ""
