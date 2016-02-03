@@ -1,6 +1,9 @@
 ---
 - name: install consul dependencies
-  yum: state=present name=libselinux-python
+  yum: state=present name={{ item }}
+  with_items:
+    - unzip
+    - libselinux-python
 
 - name: download consul
   unarchive:

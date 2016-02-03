@@ -9,37 +9,31 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Base box for consul servers
   config.vm.box = "bento/centos-6.7"
 
-  # Ip of the server that will get bootstrapped
-  leader_ip = "172.20.20.11"
+  # Use insecure key
+  config.ssh.insert_key = false
 
-  # Provision cluster servers in server mode
-  (1..3).each do |i|
-    config.vm.define "consul-server#{i}" do |consul|
-      if i == 1
-        ip = leader_ip
-        start_cmd = "consul agent -server -bootstrap -bind=#{ip} -config-dir=/etc/consul.d > /var/log/consul.log &"
-      else
-        ip = "172.20.20.1#{i}"
-        start_cmd = "consul agent -server -bind=#{ip} -config-dir=/etc/consul.d -retry-join=#{leader_ip} > /var/log/consul.log &"
-      end
-
-      consul.vm.hostname = "consul-server#{i}"
-      consul.vm.network "private_network", ip: ip
-
-      consul.vm.provision "shell", path: "scripts/provision.sh"
-      consul.vm.provision "shell", inline: start_cmd
+  N = 3
+  (0..N).each do |i|
+    if i == 0
+      name = "consul-client"
+    else
+      name = "consul-server-#{i}"
     end
-  end
+    config.vm.define name do |consul|
+      consul.vm.network "private_network", ip: "172.20.20.1#{i}"
+      consul.vm.hostname = name
 
-  # Provision consule client with ui
-  config.vm.define "consul-client" do |client|
-    ip = "172.20.20.10"
-    start_cmd = "consul agent -client=#{ip} -bind=#{ip} -config-dir=/etc/consul.d -ui -retry-join=#{leader_ip} > /var/log/consul.log &"
-
-    client.vm.hostname = "consul-client"
-    client.vm.network "private_network", ip: ip
-
-    client.vm.provision "shell", path: "scripts/provision.sh"
-    client.vm.provision "shell", inline: start_cmd
+      if i == N
+        consul.vm.provision :ansible do |ansible|
+          ansible.limit = "all"
+          ansible.playbook = "ansible/consul.yml"
+          ansible.inventory_path = "ansible/inventories/vagrant.yml"
+          ansible.extra_vars = {
+            consul_join_ip: "172.20.20.1#{i}",
+            consul_server_count: N
+          }
+        end
+      end
+    end
   end
 end

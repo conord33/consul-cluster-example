@@ -1,0 +1,7 @@
+[gce_tag=consul-client]
+172.20.20.10
+
+[gce_tag=consul-server]
+172.20.20.11
+172.20.20.12
+172.20.20.13
