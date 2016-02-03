@@ -92,6 +92,12 @@ resource "google_compute_instance" "consul-client" {
 }
 
 resource "null_resource" "Provision" {
+  triggers {
+    server_ids = "${join(",", google_compute_instance.consul-server.*.id)}"
+    client_ids = "${join(",", google_compute_instance.consul-client.*.id)}"
+    pool_id = "${google_compute_forwarding_rule.default.id}"
+  }
+
   provisioner "local-exec" {
     command = <<EOF
     cd ../ansible

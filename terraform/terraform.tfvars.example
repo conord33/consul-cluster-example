@@ -3,6 +3,6 @@ region_zone = "us-central1-a"
 project_name = "my-project-id-123"
 account_file_path = "~/.gcloud/Terraform.json"
 server_count = 3
-user = "root"
+user = "centos"
 private_key_path = "~/.ssh/id_rsa"
 public_key_path = "~/.ssh/id_rsa.pub"
